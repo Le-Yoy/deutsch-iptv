@@ -1,0 +1,9 @@
+{
+  "navigation": {
+    "home": "Startseite",
+    "packages": "Pakete",
+    "installation": "Installation",
+    "reseller": "Wiederverkäufer",
+    "blog": "Blog"
+  }
+}

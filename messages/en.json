@@ -1,0 +1,9 @@
+{
+  "navigation": {
+    "home": "Home",
+    "packages": "Packages",
+    "installation": "Installation",
+    "reseller": "Reseller",
+    "blog": "Blog"
+  }
+}
