@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://deutsch-iptv.com/sitemap.xml
