@@ -17,8 +17,8 @@ export const metadata = {
   description: 'IPTV Deutschland ✓ 26.000+ Kanäle ✓ Champions League Live & Bundesliga ✓ Netflix, Sky, DAZN ✓ 4K/8K Qualität ✓ Jetzt ab 14,99€ testen',
   keywords: 'iptv deutschland, deutsch iptv, iptv kaufen, iptv anbieter deutsch, german iptv',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
     apple: '/apple-touch-icon.png',
   }
 };
