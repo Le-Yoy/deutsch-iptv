@@ -153,7 +153,7 @@ export default async function BlogPage({
                     {post.excerpt}
                   </p>
                   <Link
-                    href={`/blog/${post.slug}`}
+                    href={`/${post.slug}`}
                     className="text-yellow-400 hover:text-yellow-300 text-sm font-semibold inline-flex items-center gap-1"
                   >
                     Weiterlesen →
