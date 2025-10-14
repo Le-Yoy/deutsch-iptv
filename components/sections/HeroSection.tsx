@@ -125,15 +125,15 @@ const scrollToPackages = () => {
         <picture>
           <source media="(max-width: 768px)" srcSet={slide.mobile} />
           <Image
-            src={slide.desktop}
-            alt={`IPTV Deutschland - ${slide.id}`}
-            fill
-            className="object-cover"
-            priority={currentSlide === 0}
-            quality={75}
-            sizes="(max-width: 768px) 100vw, 100vw"
-            loading={currentSlide === 0 ? 'eager' : 'lazy'}
-          />
+  src={slide.desktop}
+  alt={`IPTV Deutschland - ${slide.id}`}
+  fill
+  className="object-cover"
+  priority={currentSlide === 0}
+  quality={75}  // ← Change to 60
+  sizes="(max-width: 768px) 100vw, 100vw"
+  loading={currentSlide === 0 ? 'eager' : 'lazy'}
+/>
         </picture>
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/30 to-transparent" />
@@ -211,15 +211,15 @@ const scrollToPackages = () => {
       <div className="absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
         {heroSlides.map((_, idx) => (
           <button
-            key={idx}
-            onClick={() => handleSlideChange(idx)}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              idx === currentSlide
-                ? 'w-10 md:w-12 bg-gradient-to-r from-red-600 to-yellow-400'
-                : 'w-2 bg-white/40 hover:bg-white/60'
-            }`}
-            aria-label={`Slide ${idx + 1}`}
-          />
+  key={idx}
+  onClick={() => handleSlideChange(idx)}
+  aria-label={`Go to slide ${idx + 1}: ${heroSlides[idx].id}`}
+  className={`h-2 rounded-full transition-all duration-300 ${
+    idx === currentSlide
+      ? 'w-10 md:w-12 bg-gradient-to-r from-red-600 to-yellow-400'
+      : 'w-2 bg-white/40 hover:bg-white/60'
+  }`}
+/>
         ))}
       </div>
     </section>

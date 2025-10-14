@@ -96,10 +96,11 @@ export default function Navigation() {
               </button>
             </div>
             
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors duration-200"
-            >
+<button
+  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+  aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+  className="lg:hidden relative w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors duration-200"
+>
               <div className="w-6 h-5 relative flex flex-col justify-center">
                 <span className={`absolute h-0.5 w-6 bg-white transform transition-all duration-300 ease-out ${mobileMenuOpen ? 'rotate-45' : '-translate-y-2'}`} />
                 <span className={`absolute h-0.5 w-6 bg-white transition-all duration-300 ease-out ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
