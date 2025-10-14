@@ -13,9 +13,9 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'DEUTSCH IPTV - Beste IPTV Deutschland 2025 | IPTV Kaufen ab 14,99€',
-  description: 'IPTV Deutschland ✓ 26.000+ deutsche Kanäle ✓ Bundesliga, Champions League ✓ Netflix, Sky, DAZN inklusive ✓ 4K/8K Qualität.',
-  keywords: 'iptv deutsch, deutsch iptv, iptv deutschland, iptv kaufen, german iptv, iptv anbieter deutsch',
+  title: 'IPTV Deutschland - Bester Anbieter 2025 | Ab 14,99€ kaufen',
+  description: 'IPTV Deutschland ✓ 26.000+ Kanäle ✓ Champions League Live & Bundesliga ✓ Netflix, Sky, DAZN ✓ 4K/8K Qualität ✓ Jetzt ab 14,99€ testen',
+  keywords: 'iptv deutschland, deutsch iptv, iptv kaufen, iptv anbieter deutsch, german iptv',
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
