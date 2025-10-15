@@ -19,8 +19,30 @@ interface IPInfo {
 }
 
 async function getIPInfo(): Promise<IPInfo> {
+  // Skip during SSR
+  if (typeof window === 'undefined') {
+    return { 
+      ip: 'Server', 
+      country: 'Server', 
+      countryCode: 'XX', 
+      city: 'Server', 
+      flag: '' 
+    };
+  }
+
   try {
-    const res = await fetch('https://ipapi.co/json/');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+    
+    const res = await fetch('https://ipapi.co/json/', {
+      signal: controller.signal,
+      cache: 'no-store'
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!res.ok) throw new Error('IP API failed');
+    
     const data = await res.json();
     return {
       ip: data.ip || 'Unknown',
@@ -30,9 +52,10 @@ async function getIPInfo(): Promise<IPInfo> {
       flag: data.country_code ? `https://flagcdn.com/w40/${data.country_code.toLowerCase()}.png` : ''
     };
   } catch (error) {
-    console.error('IP fetch failed:', error);
+    // Fallback - track without IP
+    console.warn('IP detection skipped:', error);
     return { 
-      ip: 'Unknown', 
+      ip: 'Not detected', 
       country: 'Unknown', 
       countryCode: 'XX', 
       city: 'Unknown', 
@@ -44,12 +67,17 @@ async function getIPInfo(): Promise<IPInfo> {
 function getUserID(): string {
   if (typeof window === 'undefined') return 'SERVER';
   
-  let uid = localStorage.getItem('user_id');
-  if (!uid) {
-    uid = `USER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('user_id', uid);
+  try {
+    let uid = localStorage.getItem('user_id');
+    if (!uid) {
+      uid = `USER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem('user_id', uid);
+    }
+    return uid;
+  } catch (error) {
+    // Fallback if localStorage blocked
+    return `TEMP_${Date.now()}`;
   }
-  return uid;
 }
 
 export async function trackButtonClick(data: TrackingData) {
@@ -110,7 +138,10 @@ export async function trackLead(data: Omit<TrackingData, 'platform'>) {
   }
 
   const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-  if (!webhookUrl) return;
+  if (!webhookUrl) {
+    console.warn('Discord webhook not configured');
+    return;
+  }
 
   const countryFlag = ipInfo.countryCode === 'MA' ? '🇲🇦' : 
                       ipInfo.countryCode === 'DE' ? '🇩🇪' :
@@ -126,31 +157,35 @@ export async function trackLead(data: Omit<TrackingData, 'platform'>) {
                       ipInfo.countryCode === 'US' ? '🇺🇸' :
                       '🌍';
 
-  const embed = {
-    embeds: [{
-      title: '🎯 New Lead - Package Interest',
-      color: 0xFFA500,
-      thumbnail: ipInfo.flag ? { url: ipInfo.flag } : undefined,
-      fields: [
-        { name: '👤 User ID', value: `\`${userID}\``, inline: true },
-        { name: `${countryFlag} Location`, value: `${ipInfo.country}\n${ipInfo.city}`, inline: true },
-        { name: '🌐 IP', value: `\`${ipInfo.ip}\``, inline: true },
-        { name: '📦 Package', value: data.packageName, inline: true },
-        { name: '💰 Price', value: data.packagePrice, inline: true },
-        { name: '💻 Device', value: data.deviceType, inline: true },
-        { name: '📍 Page Section', value: data.location, inline: true },
-        { name: '🔗 URL', value: data.pageUrl, inline: false },
-      ],
-      timestamp: timestamp,
-      footer: { text: 'Lead - Modal Opened' }
-    }]
-  };
+  try {
+    const embed = {
+      embeds: [{
+        title: '🎯 New Lead - Package Interest',
+        color: 0xFFA500,
+        thumbnail: ipInfo.flag ? { url: ipInfo.flag } : undefined,
+        fields: [
+          { name: '👤 User ID', value: `\`${userID}\``, inline: true },
+          { name: `${countryFlag} Location`, value: `${ipInfo.country}\n${ipInfo.city}`, inline: true },
+          { name: '🌐 IP', value: `\`${ipInfo.ip}\``, inline: true },
+          { name: '📦 Package', value: data.packageName, inline: true },
+          { name: '💰 Price', value: data.packagePrice, inline: true },
+          { name: '💻 Device', value: data.deviceType, inline: true },
+          { name: '📍 Page Section', value: data.location, inline: true },
+          { name: '🔗 URL', value: data.pageUrl, inline: false },
+        ],
+        timestamp: timestamp,
+        footer: { text: 'Lead - Modal Opened' }
+      }]
+    };
 
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(embed)
-  });
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(embed)
+    });
+  } catch (error) {
+    console.error('Discord webhook failed:', error);
+  }
 }
 
 async function sendDiscordNotification(data: TrackingData & { 
@@ -179,34 +214,38 @@ async function sendDiscordNotification(data: TrackingData & {
                       data.ipInfo.countryCode === 'US' ? '🇺🇸' :
                       '🌍';
 
-  const embed = {
-    embeds: [{
-      title: '✅ CONVERSION - Contact Click',
-      color: data.platform === 'whatsapp' ? 0x25D366 : 0x0088cc,
-      thumbnail: data.ipInfo.flag ? { url: data.ipInfo.flag } : undefined,
-      fields: [
-        { name: '👤 User ID', value: `\`${data.userID}\``, inline: true },
-        { name: `${countryFlag} Location`, value: `${data.ipInfo.country}\n${data.ipInfo.city}`, inline: true },
-        { name: '🌐 IP', value: `\`${data.ipInfo.ip}\``, inline: true },
-        { name: '📱 Platform', value: data.platform.toUpperCase(), inline: true },
-        { name: '📦 Package', value: data.packageName, inline: true },
-        { name: '💰 Price', value: data.packagePrice, inline: true },
-        { name: '💻 Device', value: data.deviceType, inline: true },
-        { name: '📍 Page Section', value: data.location, inline: true },
-        { name: '🔗 URL', value: data.pageUrl, inline: false },
-      ],
-      timestamp: data.timestamp,
-      footer: {
-        text: 'Conversion - User Contacted'
-      }
-    }]
-  };
+  try {
+    const embed = {
+      embeds: [{
+        title: '✅ CONVERSION - Contact Click',
+        color: data.platform === 'whatsapp' ? 0x25D366 : 0x0088cc,
+        thumbnail: data.ipInfo.flag ? { url: data.ipInfo.flag } : undefined,
+        fields: [
+          { name: '👤 User ID', value: `\`${data.userID}\``, inline: true },
+          { name: `${countryFlag} Location`, value: `${data.ipInfo.country}\n${data.ipInfo.city}`, inline: true },
+          { name: '🌐 IP', value: `\`${data.ipInfo.ip}\``, inline: true },
+          { name: '📱 Platform', value: data.platform.toUpperCase(), inline: true },
+          { name: '📦 Package', value: data.packageName, inline: true },
+          { name: '💰 Price', value: data.packagePrice, inline: true },
+          { name: '💻 Device', value: data.deviceType, inline: true },
+          { name: '📍 Page Section', value: data.location, inline: true },
+          { name: '🔗 URL', value: data.pageUrl, inline: false },
+        ],
+        timestamp: data.timestamp,
+        footer: {
+          text: 'Conversion - User Contacted'
+        }
+      }]
+    };
 
-  await fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(embed)
-  });
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(embed)
+    });
+  } catch (error) {
+    console.error('Discord webhook failed:', error);
+  }
 }
 
 export function getDeviceType(): 'mobile' | 'desktop' {
