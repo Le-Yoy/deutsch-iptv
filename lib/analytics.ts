@@ -86,29 +86,49 @@ export function trackButtonClick(data: TrackingData) {
       
       // Vercel Analytics
       try {
-  track('contact_click', {
-        platform: data.platform,
-        package: data.packageName,
-        price: data.packagePrice,
-        location: data.location,
-        device: data.deviceType,
-        page: data.pageUrl,
-        ip: ipInfo.ip,
-        country: ipInfo.country,
-        userID: userID,
-        timestamp: timestamp
+        track('contact_click', {
+          platform: data.platform,
+          package: data.packageName,
+          price: data.packagePrice,
+          location: data.location,
+          device: data.deviceType,
+          page: data.pageUrl,
+          ip: ipInfo.ip,
+          country: ipInfo.country,
+          userID: userID,
+          timestamp: timestamp
         });
-} catch (e) {
-  console.error('Track failed:', e);
-}
+      } catch (e) {
+        console.error('Track failed:', e);
+      }
 
-      // Discord notification
-      sendDiscordNotification({
-        ...data,
+      // Discord notification via API route
+      const countryFlag = ipInfo.countryCode === 'MA' ? '🇲🇦' : 
+                          ipInfo.countryCode === 'DE' ? '🇩🇪' :
+                          ipInfo.countryCode === 'FR' ? '🇫🇷' :
+                          ipInfo.countryCode === 'BE' ? '🇧🇪' :
+                          ipInfo.countryCode === 'NL' ? '🇳🇱' :
+                          ipInfo.countryCode === 'AT' ? '🇦🇹' :
+                          ipInfo.countryCode === 'CH' ? '🇨🇭' :
+                          ipInfo.countryCode === 'LU' ? '🇱🇺' :
+                          ipInfo.countryCode === 'ES' ? '🇪🇸' :
+                          ipInfo.countryCode === 'IT' ? '🇮🇹' :
+                          ipInfo.countryCode === 'GB' ? '🇬🇧' :
+                          ipInfo.countryCode === 'US' ? '🇺🇸' :
+                          '🌍';
+
+      sendToAPI({
+        platform: data.platform,
+        packageName: data.packageName,
+        packagePrice: data.packagePrice,
+        location: data.location,
+        deviceType: data.deviceType,
+        pageUrl: data.pageUrl,
         timestamp,
+        userID,
         ipInfo,
-        userID
-      }).catch(console.error);
+        countryFlag
+      });
     } catch (error) {
       console.error('Tracking error:', error);
     }
@@ -135,9 +155,6 @@ export function trackLead(data: Omit<TrackingData, 'platform'>) {
         timestamp: timestamp
       });
 
-      const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-      if (!webhookUrl) return;
-
       const countryFlag = ipInfo.countryCode === 'MA' ? '🇲🇦' : 
                           ipInfo.countryCode === 'DE' ? '🇩🇪' :
                           ipInfo.countryCode === 'FR' ? '🇫🇷' :
@@ -152,85 +169,45 @@ export function trackLead(data: Omit<TrackingData, 'platform'>) {
                           ipInfo.countryCode === 'US' ? '🇺🇸' :
                           '🌍';
 
-      const embed = {
-        embeds: [{
-          title: '👁️ New Lead - Package Interest',
-          color: 0xFFA500,
-          thumbnail: ipInfo.flag ? { url: ipInfo.flag } : undefined,
-          fields: [
-            { name: '👤 User ID', value: `\`${userID}\``, inline: true },
-            { name: `${countryFlag} Location`, value: `${ipInfo.country}\n${ipInfo.city}`, inline: true },
-            { name: '🌐 IP', value: `\`${ipInfo.ip}\``, inline: true },
-            { name: '📦 Package', value: data.packageName, inline: true },
-            { name: '💰 Price', value: data.packagePrice, inline: true },
-            { name: '💻 Device', value: data.deviceType, inline: true },
-            { name: '📍 Page Section', value: data.location, inline: true },
-            { name: '🔗 URL', value: data.pageUrl, inline: false },
-          ],
-          timestamp: timestamp,
-          footer: { text: 'Lead - Modal Opened' }
-        }]
-      };
-
-      fetch(webhookUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(embed)
-      }).catch(() => {});
+      sendToAPI({
+        platform: 'lead',
+        packageName: data.packageName,
+        packagePrice: data.packagePrice,
+        location: data.location,
+        deviceType: data.deviceType,
+        pageUrl: data.pageUrl,
+        timestamp,
+        userID,
+        ipInfo,
+        countryFlag
+      });
     } catch (error) {
       console.error('Lead tracking error:', error);
     }
   });
 }
 
-async function sendDiscordNotification(data: TrackingData & { 
-  timestamp: string; 
-  ipInfo: IPInfo; 
-  userID: string 
+async function sendToAPI(data: {
+  platform: string;
+  packageName: string;
+  packagePrice: string;
+  location: string;
+  deviceType: string;
+  pageUrl: string;
+  timestamp: string;
+  userID: string;
+  ipInfo: IPInfo;
+  countryFlag: string;
 }) {
-  const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-  if (!webhookUrl) return;
-
-  const countryFlag = data.ipInfo.countryCode === 'MA' ? '🇲🇦' : 
-                      data.ipInfo.countryCode === 'DE' ? '🇩🇪' :
-                      data.ipInfo.countryCode === 'FR' ? '🇫🇷' :
-                      data.ipInfo.countryCode === 'BE' ? '🇧🇪' :
-                      data.ipInfo.countryCode === 'NL' ? '🇳🇱' :
-                      data.ipInfo.countryCode === 'AT' ? '🇦🇹' :
-                      data.ipInfo.countryCode === 'CH' ? '🇨🇭' :
-                      data.ipInfo.countryCode === 'LU' ? '🇱🇺' :
-                      data.ipInfo.countryCode === 'ES' ? '🇪🇸' :
-                      data.ipInfo.countryCode === 'IT' ? '🇮🇹' :
-                      data.ipInfo.countryCode === 'GB' ? '🇬🇧' :
-                      data.ipInfo.countryCode === 'US' ? '🇺🇸' :
-                      '🌍';
-
-  const embed = {
-    embeds: [{
-      title: '✅ CONVERSION - Contact Click',
-      color: data.platform === 'whatsapp' ? 0x25D366 : 0x0088cc,
-      thumbnail: data.ipInfo.flag ? { url: data.ipInfo.flag } : undefined,
-      fields: [
-        { name: '👤 User ID', value: `\`${data.userID}\``, inline: true },
-        { name: `${countryFlag} Location`, value: `${data.ipInfo.country}\n${data.ipInfo.city}`, inline: true },
-        { name: '🌐 IP', value: `\`${data.ipInfo.ip}\``, inline: true },
-        { name: '📱 Platform', value: data.platform.toUpperCase(), inline: true },
-        { name: '📦 Package', value: data.packageName, inline: true },
-        { name: '💰 Price', value: data.packagePrice, inline: true },
-        { name: '💻 Device', value: data.deviceType, inline: true },
-        { name: '📍 Page Section', value: data.location, inline: true },
-        { name: '🔗 URL', value: data.pageUrl, inline: false },
-      ],
-      timestamp: data.timestamp,
-      footer: { text: 'Conversion - User Contacted' }
-    }]
-  };
-
-  fetch(webhookUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(embed)
-  }).catch(() => {});
+  try {
+    await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch (error) {
+    console.error('API tracking error:', error);
+  }
 }
 
 export function getDeviceType(): 'mobile' | 'desktop' {
