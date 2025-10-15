@@ -36,8 +36,8 @@ export default function CheckoutModal({
   const whatsappLink = `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
   const telegramLink = `https://t.me/${telegramUsername}?text=${encodeURIComponent(message)}`;
 
-  const handleWhatsAppClick = async () => {
-    await trackButtonClick({
+  const handleWhatsAppClick = () => {
+    trackButtonClick({
       platform: 'whatsapp',
       packageName: packageName,
       packagePrice: packagePrice,
@@ -48,8 +48,8 @@ export default function CheckoutModal({
     window.open(whatsappLink, '_blank');
   };
 
-  const handleTelegramClick = async () => {
-    await trackButtonClick({
+  const handleTelegramClick = () => {
+    trackButtonClick({
       platform: 'telegram',
       packageName: packageName,
       packagePrice: packagePrice,

@@ -19,7 +19,6 @@ interface IPInfo {
 }
 
 async function getIPInfo(): Promise<IPInfo> {
-  // Skip during SSR
   if (typeof window === 'undefined') {
     return { 
       ip: 'Server', 
@@ -32,7 +31,7 @@ async function getIPInfo(): Promise<IPInfo> {
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
     
     const res = await fetch('https://ipapi.co/json/', {
       signal: controller.signal,
@@ -51,9 +50,7 @@ async function getIPInfo(): Promise<IPInfo> {
       city: data.city || 'Unknown',
       flag: data.country_code ? `https://flagcdn.com/w40/${data.country_code.toLowerCase()}.png` : ''
     };
-  } catch (error) {
-    // Fallback - track without IP
-    console.warn('IP detection skipped:', error);
+  } catch {
     return { 
       ip: 'Not detected', 
       country: 'Unknown', 
@@ -74,118 +71,116 @@ function getUserID(): string {
       localStorage.setItem('user_id', uid);
     }
     return uid;
-  } catch (error) {
-    // Fallback if localStorage blocked
+  } catch {
     return `TEMP_${Date.now()}`;
   }
 }
 
-export async function trackButtonClick(data: TrackingData) {
-  const timestamp = new Date().toISOString();
-  const ipInfo = await getIPInfo();
-  const userID = getUserID();
-  
-  // Track in Vercel Analytics
-  try {
-    await track('contact_click', {
-      platform: data.platform,
-      package: data.packageName,
-      price: data.packagePrice,
-      location: data.location,
-      device: data.deviceType,
-      page: data.pageUrl,
-      ip: ipInfo.ip,
-      country: ipInfo.country,
-      userID: userID,
-      timestamp: timestamp
-    });
-  } catch (error) {
-    console.error('Vercel tracking failed:', error);
-  }
-
-  // Send to Discord webhook
-  try {
-    await sendDiscordNotification({
-      ...data,
-      timestamp,
-      ipInfo,
-      userID
-    });
-  } catch (error) {
-    console.error('Discord notification failed:', error);
-  }
+// NON-BLOCKING - Fire and forget
+export function trackButtonClick(data: TrackingData) {
+  Promise.resolve().then(async () => {
+    try {
+      const timestamp = new Date().toISOString();
+      const userID = getUserID();
+      const ipInfo = await getIPInfo();
+      
+      // Vercel Analytics
+      try {
+  track('contact_click', {
+        platform: data.platform,
+        package: data.packageName,
+        price: data.packagePrice,
+        location: data.location,
+        device: data.deviceType,
+        page: data.pageUrl,
+        ip: ipInfo.ip,
+        country: ipInfo.country,
+        userID: userID,
+        timestamp: timestamp
+        });
+} catch (e) {
+  console.error('Track failed:', e);
 }
 
-export async function trackLead(data: Omit<TrackingData, 'platform'>) {
-  const timestamp = new Date().toISOString();
-  const ipInfo = await getIPInfo();
-  const userID = getUserID();
-  
-  try {
-    await track('package_interest', {
-      package: data.packageName,
-      price: data.packagePrice,
-      location: data.location,
-      device: data.deviceType,
-      page: data.pageUrl,
-      ip: ipInfo.ip,
-      country: ipInfo.country,
-      userID: userID,
-      timestamp: timestamp
-    });
-  } catch (error) {
-    console.error('Lead tracking failed:', error);
-  }
+      // Discord notification
+      sendDiscordNotification({
+        ...data,
+        timestamp,
+        ipInfo,
+        userID
+      }).catch(console.error);
+    } catch (error) {
+      console.error('Tracking error:', error);
+    }
+  });
+}
 
-  const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-  if (!webhookUrl) {
-    console.warn('Discord webhook not configured');
-    return;
-  }
+// NON-BLOCKING - Fire and forget
+export function trackLead(data: Omit<TrackingData, 'platform'>) {
+  Promise.resolve().then(async () => {
+    try {
+      const timestamp = new Date().toISOString();
+      const userID = getUserID();
+      const ipInfo = await getIPInfo();
+      
+      track('package_interest', {
+        package: data.packageName,
+        price: data.packagePrice,
+        location: data.location,
+        device: data.deviceType,
+        page: data.pageUrl,
+        ip: ipInfo.ip,
+        country: ipInfo.country,
+        userID: userID,
+        timestamp: timestamp
+      });
 
-  const countryFlag = ipInfo.countryCode === 'MA' ? '🇲🇦' : 
-                      ipInfo.countryCode === 'DE' ? '🇩🇪' :
-                      ipInfo.countryCode === 'FR' ? '🇫🇷' :
-                      ipInfo.countryCode === 'BE' ? '🇧🇪' :
-                      ipInfo.countryCode === 'NL' ? '🇳🇱' :
-                      ipInfo.countryCode === 'AT' ? '🇦🇹' :
-                      ipInfo.countryCode === 'CH' ? '🇨🇭' :
-                      ipInfo.countryCode === 'LU' ? '🇱🇺' :
-                      ipInfo.countryCode === 'ES' ? '🇪🇸' :
-                      ipInfo.countryCode === 'IT' ? '🇮🇹' :
-                      ipInfo.countryCode === 'GB' ? '🇬🇧' :
-                      ipInfo.countryCode === 'US' ? '🇺🇸' :
-                      '🌍';
+      const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
+      if (!webhookUrl) return;
 
-  try {
-    const embed = {
-      embeds: [{
-        title: '🎯 New Lead - Package Interest',
-        color: 0xFFA500,
-        thumbnail: ipInfo.flag ? { url: ipInfo.flag } : undefined,
-        fields: [
-          { name: '👤 User ID', value: `\`${userID}\``, inline: true },
-          { name: `${countryFlag} Location`, value: `${ipInfo.country}\n${ipInfo.city}`, inline: true },
-          { name: '🌐 IP', value: `\`${ipInfo.ip}\``, inline: true },
-          { name: '📦 Package', value: data.packageName, inline: true },
-          { name: '💰 Price', value: data.packagePrice, inline: true },
-          { name: '💻 Device', value: data.deviceType, inline: true },
-          { name: '📍 Page Section', value: data.location, inline: true },
-          { name: '🔗 URL', value: data.pageUrl, inline: false },
-        ],
-        timestamp: timestamp,
-        footer: { text: 'Lead - Modal Opened' }
-      }]
-    };
+      const countryFlag = ipInfo.countryCode === 'MA' ? '🇲🇦' : 
+                          ipInfo.countryCode === 'DE' ? '🇩🇪' :
+                          ipInfo.countryCode === 'FR' ? '🇫🇷' :
+                          ipInfo.countryCode === 'BE' ? '🇧🇪' :
+                          ipInfo.countryCode === 'NL' ? '🇳🇱' :
+                          ipInfo.countryCode === 'AT' ? '🇦🇹' :
+                          ipInfo.countryCode === 'CH' ? '🇨🇭' :
+                          ipInfo.countryCode === 'LU' ? '🇱🇺' :
+                          ipInfo.countryCode === 'ES' ? '🇪🇸' :
+                          ipInfo.countryCode === 'IT' ? '🇮🇹' :
+                          ipInfo.countryCode === 'GB' ? '🇬🇧' :
+                          ipInfo.countryCode === 'US' ? '🇺🇸' :
+                          '🌍';
 
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(embed)
-    });
-  } catch (error) {
-    console.error('Discord webhook failed:', error);
-  }
+      const embed = {
+        embeds: [{
+          title: '👁️ New Lead - Package Interest',
+          color: 0xFFA500,
+          thumbnail: ipInfo.flag ? { url: ipInfo.flag } : undefined,
+          fields: [
+            { name: '👤 User ID', value: `\`${userID}\``, inline: true },
+            { name: `${countryFlag} Location`, value: `${ipInfo.country}\n${ipInfo.city}`, inline: true },
+            { name: '🌐 IP', value: `\`${ipInfo.ip}\``, inline: true },
+            { name: '📦 Package', value: data.packageName, inline: true },
+            { name: '💰 Price', value: data.packagePrice, inline: true },
+            { name: '💻 Device', value: data.deviceType, inline: true },
+            { name: '📍 Page Section', value: data.location, inline: true },
+            { name: '🔗 URL', value: data.pageUrl, inline: false },
+          ],
+          timestamp: timestamp,
+          footer: { text: 'Lead - Modal Opened' }
+        }]
+      };
+
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(embed)
+      }).catch(() => {});
+    } catch (error) {
+      console.error('Lead tracking error:', error);
+    }
+  });
 }
 
 async function sendDiscordNotification(data: TrackingData & { 
@@ -194,11 +189,7 @@ async function sendDiscordNotification(data: TrackingData & {
   userID: string 
 }) {
   const webhookUrl = process.env.NEXT_PUBLIC_DISCORD_WEBHOOK_URL;
-  
-  if (!webhookUrl) {
-    console.warn('Discord webhook URL not configured');
-    return;
-  }
+  if (!webhookUrl) return;
 
   const countryFlag = data.ipInfo.countryCode === 'MA' ? '🇲🇦' : 
                       data.ipInfo.countryCode === 'DE' ? '🇩🇪' :
@@ -214,38 +205,32 @@ async function sendDiscordNotification(data: TrackingData & {
                       data.ipInfo.countryCode === 'US' ? '🇺🇸' :
                       '🌍';
 
-  try {
-    const embed = {
-      embeds: [{
-        title: '✅ CONVERSION - Contact Click',
-        color: data.platform === 'whatsapp' ? 0x25D366 : 0x0088cc,
-        thumbnail: data.ipInfo.flag ? { url: data.ipInfo.flag } : undefined,
-        fields: [
-          { name: '👤 User ID', value: `\`${data.userID}\``, inline: true },
-          { name: `${countryFlag} Location`, value: `${data.ipInfo.country}\n${data.ipInfo.city}`, inline: true },
-          { name: '🌐 IP', value: `\`${data.ipInfo.ip}\``, inline: true },
-          { name: '📱 Platform', value: data.platform.toUpperCase(), inline: true },
-          { name: '📦 Package', value: data.packageName, inline: true },
-          { name: '💰 Price', value: data.packagePrice, inline: true },
-          { name: '💻 Device', value: data.deviceType, inline: true },
-          { name: '📍 Page Section', value: data.location, inline: true },
-          { name: '🔗 URL', value: data.pageUrl, inline: false },
-        ],
-        timestamp: data.timestamp,
-        footer: {
-          text: 'Conversion - User Contacted'
-        }
-      }]
-    };
+  const embed = {
+    embeds: [{
+      title: '✅ CONVERSION - Contact Click',
+      color: data.platform === 'whatsapp' ? 0x25D366 : 0x0088cc,
+      thumbnail: data.ipInfo.flag ? { url: data.ipInfo.flag } : undefined,
+      fields: [
+        { name: '👤 User ID', value: `\`${data.userID}\``, inline: true },
+        { name: `${countryFlag} Location`, value: `${data.ipInfo.country}\n${data.ipInfo.city}`, inline: true },
+        { name: '🌐 IP', value: `\`${data.ipInfo.ip}\``, inline: true },
+        { name: '📱 Platform', value: data.platform.toUpperCase(), inline: true },
+        { name: '📦 Package', value: data.packageName, inline: true },
+        { name: '💰 Price', value: data.packagePrice, inline: true },
+        { name: '💻 Device', value: data.deviceType, inline: true },
+        { name: '📍 Page Section', value: data.location, inline: true },
+        { name: '🔗 URL', value: data.pageUrl, inline: false },
+      ],
+      timestamp: data.timestamp,
+      footer: { text: 'Conversion - User Contacted' }
+    }]
+  };
 
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(embed)
-    });
-  } catch (error) {
-    console.error('Discord webhook failed:', error);
-  }
+  fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(embed)
+  }).catch(() => {});
 }
 
 export function getDeviceType(): 'mobile' | 'desktop' {

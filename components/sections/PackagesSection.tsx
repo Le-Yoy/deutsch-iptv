@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import CheckoutModal from '@/components/CheckoutModal';
+import { trackLead, getDeviceType } from '@/lib/analytics';
+
 
 interface Package {
   name: string;
@@ -96,6 +98,14 @@ export default function PackagesSection({ locale = 'de' }: PackagesSectionProps)
   const [selectedPackage, setSelectedPackage] = useState({ name: '', price: '' });
 
   const handlePackageClick = (name: string, price: string) => {
+    trackLead({
+      packageName: `${name} - ${selectedDevices} ${selectedDevices === 1 ? 'Gerät' : 'Geräte'}`,
+      packagePrice: price,
+      location: 'packages_section',
+      deviceType: getDeviceType(),
+      pageUrl: typeof window !== 'undefined' ? window.location.href : ''
+    });
+
     setSelectedPackage({ name, price });
     setModalOpen(true);
   };

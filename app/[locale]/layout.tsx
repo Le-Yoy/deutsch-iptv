@@ -5,6 +5,7 @@ import Navigation from '@/components/layout/Navigation';
 import TawkTo from '@/components/TawkTo';
 import { faviconSvgString } from '@/components/ui/Favicon';
 import '../globals.css';
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -103,6 +104,7 @@ export default async function RootLayout({
           <Navigation />
           <main>{children}</main>
           <TawkTo />
+          <Analytics />
         </NextIntlClientProvider>
       </body>
     </html>
