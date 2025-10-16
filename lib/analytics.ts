@@ -30,26 +30,15 @@ async function getIPInfo(): Promise<IPInfo> {
   }
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-    
-    const res = await fetch('https://ipapi.co/json/', {
-      signal: controller.signal,
+    const res = await fetch('/api/geo', {
       cache: 'no-store'
     });
     
-    clearTimeout(timeoutId);
-    
-    if (!res.ok) throw new Error('IP API failed');
-    
-    const data = await res.json();
-    return {
-      ip: data.ip || 'Unknown',
-      country: data.country_name || 'Unknown',
-      countryCode: data.country_code || 'XX',
-      city: data.city || 'Unknown',
-      flag: data.country_code ? `https://flagcdn.com/w40/${data.country_code.toLowerCase()}.png` : ''
-    };
+    if (res.ok) {
+      const data = await res.json();
+      return data;
+    }
+    throw new Error('Geo API failed');
   } catch {
     return { 
       ip: 'Not detected', 
