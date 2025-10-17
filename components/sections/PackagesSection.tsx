@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import CheckoutModal from '@/components/CheckoutModal';
 import { trackLead, getDeviceType } from '@/lib/analytics';
 
@@ -93,22 +94,24 @@ interface PackagesSectionProps {
 }
 
 export default function PackagesSection({ locale = 'de' }: PackagesSectionProps) {
+  const router = useRouter();
   const [selectedDevices, setSelectedDevices] = useState(1);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPackage, setSelectedPackage] = useState({ name: '', price: '' });
 
-  const handlePackageClick = (name: string, price: string) => {
-    trackLead({
-      packageName: `${name} - ${selectedDevices} ${selectedDevices === 1 ? 'Gerät' : 'Geräte'}`,
-      packagePrice: price,
-      location: 'packages_section',
-      deviceType: getDeviceType(),
-      pageUrl: typeof window !== 'undefined' ? window.location.href : ''
-    });
+const handlePackageClick = (name: string, price: string, duration: string) => {
+  // Track the lead
+  trackLead({
+    packageName: `${name} - ${duration} - ${selectedDevices} ${selectedDevices === 1 ? 'Gerät' : 'Geräte'}`,
+    packagePrice: price,
+    location: 'packages_section',
+    deviceType: getDeviceType(),
+    pageUrl: typeof window !== 'undefined' ? window.location.href : ''
+  });
 
-    setSelectedPackage({ name, price });
-    setModalOpen(true);
-  };
+  // Navigate with simple params that survive language switch
+  router.push(`/checkout?package=${encodeURIComponent(name)}&duration=${encodeURIComponent(duration)}&devices=${selectedDevices}&price=${encodeURIComponent(price)}`);
+};
 
   const getPrice = (basePrice: number): string => {
     const price = pricingMatrix[basePrice]?.[selectedDevices] || basePrice;
@@ -205,7 +208,7 @@ export default function PackagesSection({ locale = 'de' }: PackagesSectionProps)
 
                 {/* Buy Button */}
                 <button
-                  onClick={() => handlePackageClick(pkg.name, `${price}€`)}
+                  onClick={() => handlePackageClick(pkg.name, `${price}€`, pkg.duration)}
                   className={`w-full py-2.5 sm:py-3 font-bold rounded-xl transition-all duration-300 shadow-lg text-sm sm:text-base ${
                     isFeatured 
                       ? 'bg-gradient-to-r from-yellow-500 to-red-600 hover:from-yellow-600 hover:to-red-700 text-white hover:shadow-2xl'
@@ -280,7 +283,7 @@ export default function PackagesSection({ locale = 'de' }: PackagesSectionProps)
         </div>
       </div>
 
-      {/* Checkout Modal */}
+      {/* Checkout Modal - KEPT FOR BACKUP (not used) */}
       {modalOpen && (
         <CheckoutModal
           isOpen={modalOpen}

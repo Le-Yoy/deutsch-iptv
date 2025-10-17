@@ -1,9 +1,52 @@
 {
+  "existing": "content...",
+
+
   "navigation": {
     "home": "Startseite",
-    "packages": "Pakete",
+    "packages": "Preise",
     "installation": "Installation",
     "reseller": "Wiederverkäufer",
     "blog": "Blog"
+  },
+  "checkout": {
+    "secureBadge": "Sicherer Checkout",
+    "headline": "Fast geschafft!",
+    "subheadline": "Nur noch ein Schritt bis zu Ihrem IPTV-Zugang",
+    "selectedPackage": "Ihr gewähltes Paket:",
+    "instantActivation": "Sofortige Aktivierung",
+    "oneTime": "einmalig",
+    
+    "whyContactTitle": "Warum kontaktieren Sie uns zuerst?",
+    "instantActivationTitle": "Sofortige Aktivierung",
+    "instantActivationDesc": "Sobald Ihre Zahlung eingegangen ist, aktivieren wir Ihr IPTV-Konto innerhalb von 5 Minuten. Kein Warten, kein Stress.",
+    "securePaymentTitle": "Sichere Zahlung",
+    "securePaymentDesc": "PayPal, Banküberweisung, oder Kryptowährung - Sie wählen die Methode, die Sie bevorzugen. Alle Zahlungen sind verschlüsselt und sicher.",
+    "personalSupportTitle": "Persönlicher Support",
+    "personalSupportDesc": "Ein echter Mensch hilft Ihnen bei jedem Schritt. Keine automatisierten Systeme, keine Wartezeit. Direkter Support auf Deutsch.",
+    "guaranteeTitle": "14-Tage Geld-zurück-Garantie",
+    "guaranteeDesc": "Nicht zufrieden? Volle Rückerstattung, keine Fragen gestellt. Ihr Risiko = 0€.",
+    
+    "paymentMethodsTitle": "Akzeptierte Zahlungsmethoden",
+    
+    "howItWorksTitle": "So funktioniert es",
+    "step1Title": "Kontaktieren Sie uns",
+    "step1Desc": "Klicken Sie unten auf WhatsApp oder Telegram",
+    "step2Title": "Wir senden Zahlungsdetails",
+    "step2Desc": "PayPal E-Mail, Bankverbindung, oder Crypto-Adresse - Sie wählen",
+    "step3Title": "Sie zahlen sicher",
+    "step3Desc": "Mit Ihrer bevorzugten Zahlungsmethode",
+    "step4Title": "Sofortige Aktivierung",
+    "step4Desc": "Ihre Zugangsdaten in 5 Minuten per Chat",
+    
+    "whatsappCta": "Jetzt per WhatsApp bezahlen",
+    "telegramCta": "Jetzt per Telegram bezahlen",
+    
+    "socialProofRating": "4.9/5 basierend auf 10.000+ Bewertungen",
+    "socialProofQuote": "Sehr schnell und zuverlässig! - Thomas M.",
+    
+    "noPackageTitle": "Kein Paket ausgewählt",
+    "noPackageDesc": "Bitte wählen Sie ein Paket von unserer Preisseite.",
+    "goToPackages": "Zu den Paketen"
   }
 }

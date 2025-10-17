@@ -35,14 +35,26 @@ export default function Navigation() {
     return cleanPath === href;
   };
 
-  const switchLanguage = (newLocale: string) => {
-    startTransition(() => {
-      const currentPath = pathname.replace('/en', '');
-      const targetPath = newLocale === 'en' ? `/en${currentPath || '/'}` : (currentPath || '/');
-      router.push(targetPath);
-      router.refresh();
-    });
-  };
+const switchLanguage = (newLocale: string) => {
+  startTransition(() => {
+    // Get current path without locale
+    const currentPath = pathname.replace('/en', '');
+    
+    // Get search params from window.location (not hook)
+    const searchString = typeof window !== 'undefined' ? window.location.search : '';
+    
+    // Build new path with locale
+    const targetPath = newLocale === 'en' 
+      ? `/en${currentPath || '/'}`
+      : (currentPath || '/');
+    
+    // Add search params
+    const finalPath = `${targetPath}${searchString}`;
+    
+    router.push(finalPath);
+    router.refresh();
+  });
+};
 
   return (
     <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${

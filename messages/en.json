@@ -1,9 +1,52 @@
 {
+  "existing": "content...",
+  
   "navigation": {
     "home": "Home",
-    "packages": "Packages",
+    "packages": "Pricing",
     "installation": "Installation",
     "reseller": "Reseller",
     "blog": "Blog"
+  },
+
+  "checkout": {
+    "secureBadge": "Secure Checkout",
+    "headline": "Almost there!",
+    "subheadline": "Just one step away from your IPTV access",
+    "selectedPackage": "Your selected package:",
+    "instantActivation": "Instant activation",
+    "oneTime": "one-time",
+    
+    "whyContactTitle": "Why contact us first?",
+    "instantActivationTitle": "Instant Activation",
+    "instantActivationDesc": "Once your payment is received, we activate your IPTV account within 5 minutes. No waiting, no stress.",
+    "securePaymentTitle": "Secure Payment",
+    "securePaymentDesc": "PayPal, bank transfer, or cryptocurrency - you choose the method you prefer. All payments are encrypted and secure.",
+    "personalSupportTitle": "Personal Support",
+    "personalSupportDesc": "A real person helps you every step of the way. No automated systems, no waiting. Direct support in English.",
+    "guaranteeTitle": "14-Day Money-Back Guarantee",
+    "guaranteeDesc": "Not satisfied? Full refund, no questions asked. Your risk = €0.",
+    
+    "paymentMethodsTitle": "Accepted Payment Methods",
+    
+    "howItWorksTitle": "How It Works",
+    "step1Title": "Contact us",
+    "step1Desc": "Click WhatsApp or Telegram below",
+    "step2Title": "We send payment details",
+    "step2Desc": "PayPal email, bank details, or crypto address - you choose",
+    "step3Title": "You pay securely",
+    "step3Desc": "With your preferred payment method",
+    "step4Title": "Instant activation",
+    "step4Desc": "Your credentials in 5 minutes via chat",
+    
+    "whatsappCta": "Pay via WhatsApp now",
+    "telegramCta": "Pay via Telegram now",
+    
+    "socialProofRating": "4.9/5 based on 10,000+ reviews",
+    "socialProofQuote": "Very fast and reliable! - Thomas M.",
+    
+    "noPackageTitle": "No Package Selected",
+    "noPackageDesc": "Please select a package from our pricing page.",
+    "goToPackages": "View Packages"
   }
 }

@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /checkout
+Disallow: /en/checkout
+Disallow: /api/
 
 Sitemap: https://deutsch-iptv.com/sitemap.xml
