@@ -75,37 +75,6 @@ const productSchema = {
   }
 };
 
-const faqSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'FAQPage',
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: 'Wie viel kostet IPTV Deutschland?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'IPTV Deutschland kostet ab 4,89€ pro Monat bei jährlicher Zahlung. Wir bieten verschiedene Pakete von 1 Monat bis 12 Monate an.'
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'Wie viele Kanäle sind enthalten?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Unser IPTV-Service bietet über 26.000 Kanäle, darunter alle deutschen Sender, Bundesliga, Champions League, Netflix, Sky, DAZN und internationale Kanäle in 4K/8K Qualität.'
-      }
-    },
-    {
-      '@type': 'Question',
-      name: 'Kann ich IPTV auf mehreren Geräten nutzen?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Ja, je nach gewähltem Paket können Sie IPTV auf 1 bis 5 Geräten gleichzeitig nutzen. Kompatibel mit Smart TV, Fire Stick, Android, iOS und mehr.'
-      }
-    }
-  ]
-};
-
 export default async function RootLayout({
   children,
   params
@@ -162,12 +131,6 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-        />
-        
-        {/* Structured Data - FAQ */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
       </head>
       <body 
