@@ -16,7 +16,7 @@ const packages: Package[] = [
   { name: 'SILBER-PAKET', duration: '1 MONAT', basePrice: 14.99 },
   { name: 'GOLD-PAKET', duration: '3 MONATE', basePrice: 34.99 },
   { name: 'PLATINUM-PAKET', duration: '6 MONATE', basePrice: 44.99 },
-  { name: 'DIAMANT-PAKET', duration: '12 MONATE', basePrice: 64.99 }
+  { name: 'DIAMANT-PAKET', duration: '12 MONATE', basePrice: 59.99 }
 ];
 
 // Correct pricing matrix
@@ -24,7 +24,7 @@ const pricingMatrix: Record<number, Record<number, number>> = {
   14.99: { 1: 14.99, 2: 24.99, 3: 34.99, 4: 44.99, 5: 54.99 },
   34.99: { 1: 34.99, 2: 54.99, 3: 74.99, 4: 94.99, 5: 114.99 },
   44.99: { 1: 44.99, 2: 69.99, 3: 110.00, 4: 142.50, 5: 175.00 },
-  64.99: { 1: 64.99, 2: 124.99, 3: 180.00, 4: 237.50, 5: 295.00 }
+  59.99: { 1: 59.99, 2: 124.99, 3: 180.00, 4: 237.50, 5: 295.00 }
 };
 
 // Dynamic recommendations based on device count

@@ -3,7 +3,7 @@ export const devicePackages = {
     {
       name: 'DIAMANT-PAKET X1',
       duration: '12 MONATE',
-      price: '64.99€',
+      price: '59.99€',
       originalPrice: '180€',
       color: 'bg-red-500'
     },
