@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: '🔥 IPTV ab 4,89€/Monat - 26.000+ Kanäle | Bundesliga & Netflix 4K',
+  title: '🔥 IPTV ab 4,89€/Monat - 46.000+ Kanäle | Bundesliga & Netflix 4K',
   description: '⚡ Sofort-Start in 5 Min! Bundesliga, Champions League, Netflix, Sky in 4K. 14 Tage testen ohne Risiko. Über 18.000 Deutsche nutzen uns bereits. Jetzt 50% Rabatt sichern!',
   keywords: 'iptv deutschland, deutsch iptv, iptv kaufen, iptv anbieter deutsch, german iptv, iptv subscription, iptv germany, bundesliga iptv, netflix iptv',
   icons: {
